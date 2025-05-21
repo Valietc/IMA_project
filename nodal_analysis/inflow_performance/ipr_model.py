@@ -25,3 +25,30 @@ class InvertedWell(WellInflow):
             raise ValueError("Забойное давление не может быть отрицательным.")
         self.accumulated_production += flow_rate
         return bottomhole_pressure
+
+    
+class VogelModel:
+    def __init__(self, pi: float, pwf: float, pr: float):
+        """
+        Инициализация модели Фогеля.
+
+        :param pi: Коэффициент продуктивности (Productivity Index), станд. ед.
+        :param pwf: Забойное давление (bottom-hole pressure), psi
+        :param pr: Пластовое давление (reservoir pressure), psi
+        """
+        self.pi = pi
+        self.pwf = pwf
+        self.pr = pr
+
+    def calculate_flow_rate(self) -> float:
+        """
+        Расчёт дебита скважины по уравнению Фогеля:
+        Q = PI * Pr * (1 - 0.2*(Pwf/Pr) - 0.8*(Pwf/Pr)^2)
+
+        :return: Дебит скважины
+        """
+        if self.pwf >= self.pr:
+            return 0.0
+        ratio = self.pwf / self.pr
+        q = self.pi * self.pr * (1 - 0.2 * ratio - 0.8 * ratio**2)
+        return q
